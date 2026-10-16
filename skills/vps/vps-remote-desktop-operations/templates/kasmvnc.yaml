@@ -1,0 +1,38 @@
+# KasmVNC config -- desktop bound to the tailnet only.
+# Install to /etc/kasmvnc/kasmvnc.yaml AND ~/.vnc/kasmvnc.yaml (the per-user copy wins).
+desktop:
+  resolution:
+    width: 1600
+    height: 900
+  allow_resize: true
+  pixel_depth: 24
+  gpu:
+    hw3d: false
+
+network:
+  protocol: http
+  # Só o IP do Tailscale: NAO fica acessivel pela internet publica.
+  interface: 100.105.134.116   # <-- troque pelo `tailscale ip -4` da maquina
+  websocket_port: 6901
+  use_ipv4: true
+  use_ipv6: false
+  ssl:
+    require_ssl: false
+
+user_session:
+  new_session_disconnects_existing_exclusive_session: false
+  concurrent_connections_prompt: false
+  idle_timeout: never
+
+security:
+  brute_force_protection:
+    blacklist_threshold: 5
+    blacklist_timeout: 10
+
+logging:
+  log_writer_name: all
+  log_dest: logfile
+  level: 30
+
+encoding:
+  max_frame_rate: 30

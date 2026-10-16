@@ -1,0 +1,11 @@
+#!/bin/sh
+# Sessao XFCE dentro do KasmVNC. Instale em ~/.vnc/xstartup com modo 755.
+export XDG_CURRENT_DESKTOP=XFCE
+export XDG_SESSION_TYPE=x11
+export SAL_USE_VCLPLUGIN=gtk3
+unset SESSION_MANAGER
+unset DBUS_SESSION_BUS_ADDRESS
+if command -v dbus-launch >/dev/null 2>&1; then
+  eval "$(dbus-launch --sh-syntax --exit-with-session)"
+fi
+exec startxfce4

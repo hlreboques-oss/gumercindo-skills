@@ -1,0 +1,19 @@
+[Unit]
+Description=KasmVNC -- desktop remoto via tailnet (porta 6901)
+After=network-online.target tailscaled.service
+Wants=network-online.target tailscaled.service
+
+[Service]
+Type=forking
+User=root
+Environment=HOME=/root
+Environment=DISPLAY=:1
+ExecStartPre=-/usr/bin/vncserver -kill :1
+ExecStart=/usr/bin/vncserver :1 -select-de manual -geometry 1600x900 -depth 24 -desktop "VPS | Carlos"
+ExecStop=/usr/bin/vncserver -kill :1
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=20
+
+[Install]
+WantedBy=multi-user.target
