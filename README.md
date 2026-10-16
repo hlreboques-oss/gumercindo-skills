@@ -23,6 +23,10 @@ skills/
     video-use                              # editar vídeo por conversa
   video-post-production-operations/        # pós-produção: corte, legenda, cor, som
   raw-footage-speaker-edit-ffmpeg/         # bruto de celular → corte com título/legenda
+
+  social-media/
+    whatsapp-evolution-connection         # ligar WhatsApp (QR) na Evolution + webhook no Hermes
+    clinic-whatsapp-attendance            # atender no WhatsApp como assistente da dona (modo sombra)
   operations/
     healthcare-appointment-intake-operations  # fluxo Nutrio (anamnese/consulta)
 mindset/
