@@ -10,6 +10,16 @@ spoken-word legendas and transitions between people — then deliver it as a Tel
 Recipes: `references/ffmpeg-render-recipes.md`. Starter pipeline to copy: `templates/edit_pipeline.py`.
 Getting the source file when the clip lives behind a social/YouTube URL (owned Instagram media, extractor bot
 walls): `references/source-media-acquisition-ladder.md`.
+Arquivo morto e limpeza do acervo — inventário com miniaturas, galeria onde o Carlos marca o que guardar,
+arquivamento dos finais no Drive e o que sai do disco: `references/media-archive-cleanup.md`.
+
+## Gate zero: bind the correction to the right artifact
+
+Before revising a video, resolve the replied-to attachment/message, named person or client, and exact source/version. In a group with several concurrent edits, do not assume “esse vídeo” means the most recent render. Inspect the reply target and project manifest first; if those cannot distinguish candidates, ask one short identification question before spending credits or rendering. When Carlos corrects the target, update that project's brief without transferring the correction to unrelated videos. Approval to publish a different video does not close the original revision request: keep the two states separate.
+
+## Match the reference's transformation before editing
+
+When Carlos supplies a demonstration of a tool or editing technique, inspect its actual before/after frames and spoken explanation before promising an equivalent result. Separate ordinary crop/zoom, graphic overlays, and generated camera viewpoints: an unseen lateral or overhead view requires reconstruction, not just FFmpeg or motion cards. Load the `code-generated-motion-video` skill and its generative-reframing reference for the integration, bounded-test and fidelity gates. For a didactic explainer mixing designed interfaces and real footage, load the topical reference **Reference-led hybrid explainers** linked from that skill to map the ordered argument to visible actions and evidence. Honor the specifically requested generation platform; ask before substituting a local-code or illustrated approach. Preserve original audio when transforming his recording, but do not equate soundtrack preservation with correct generated lip movement.
 
 ## Gate zero: prove the footage is on disk
 
@@ -18,22 +28,15 @@ Before writing a cut plan, confirming a brief or promising a delivery, prove the
 **that** chat, then `ffprobe` the candidate and look at a frame or two — a cached file can belong to a different
 chat, so a timestamp alone is not identification. Chat media fails silently (the send looks normal on the
 sender's side, nothing arrives on this one), so "I sent you the video" is not evidence; a probed file on disk is.
-Limits, log greps and the ask-the-sender fallback: `references/source-media-acquisition-ladder.md`.
+Limits, log greps, direct Google Drive download, and the ask-the-sender fallback: `references/source-media-acquisition-ladder.md`. When a folder listing does not expose the named upload, ask for the direct file link before asking the user to upload again. Confirm the source's measured duration first if requested, then continue an already-authorized edit; report the source duration separately from the requested final duration.
 
 ## Cutting one long live into a batch of vertical clips
 
-When the ask is many short clips from a single long recording ("não se limite a cinco, quantos derem"), do not hand-render one clip at a time: select 10-14 non-overlapping excerpts into a `clips.json` manifest
-(`id,start,end,title,label,quote,theme`) covering every theme the user named, review it, then let one
-self-contained render script process each clip (it refines word timings on the selected window only, burns
-captions, overlays the brand badge, asserts duration, decodes the file and appends to `summary.json` as it
-finishes). Give each clip a `label` so different themes carry different upper lines, and split large batches
-across render workers by ID slice. Caption/title bands, the mascot-badge recipe and the render flags:
-`references/vertical-clip-batch-and-branding.md`. In a stacked two-speaker source (host above, guest below)
-the captions belong on the seam between the panels, not at the bottom: the bottom band sits on the lower
-speaker's face and the badge, composited after the captions, then truncates the text behind it. For Carlos's
-split-screen lives, keep the hook/title visible only for the first ~3 seconds, slightly below the top safe/search
-area, then remove it for the rest of the clip; a persistent top title wastes space and makes the edit feel less
-native.
+When the ask is many short clips from one long recording, transcribe first and select as many distinct, complete thoughts as the source supports; do not impose an arbitrary clip count. For a requested 1:00–1:30 range, each clip must establish its topic, develop it and finish its conclusion within 60–90 seconds. Move boundaries to sentence/word edges rather than filling duration with repetition, padding or a cut-off argument. Refine uncertain speech on selected windows before burning captions; mark genuinely unrecoverable words rather than inventing names or figures.
+
+Store non-overlapping excerpts in `clips.json` (`id,start,end,title,label,quote,theme`), verify interval overlap programmatically, then render with one rerunnable pipeline that appends each completed clip's path, duration, bytes, hash and decode result to `summary.json`. Split large batches across workers by ID slice; aggregate and count the saved results before delivery. Give each clip a topic label, but do not replace the user's requested event heading with that label. Caption/title bands and render settings: `references/vertical-clip-batch-and-branding.md`.
+
+Separate a short opening hook from an explicit event header. Default split-screen hooks can disappear after ~3 seconds; when Carlos asks for an event/theme at the top, keep his exact heading visible throughout every clip, in a safe band away from faces. For Empresários SA lecture cuts, the heading is `Palestra no Empresários SA`. Place split-screen captions on the seam between panels, not across the lower speaker's face, and inspect first/middle/end frames of every output. Export all requested clips for individual Telegram delivery, not only a ZIP or a few previews; distinguish exported, technically verified and visually reviewed when reporting progress.
 
 ## Putting a separately recorded narration on the picture (slide sync)
 
@@ -101,6 +104,21 @@ external music as the answer when Carlos says “está sem som” unless he has 
 licensed bed (`references/silent-video-music-bed.md`), or create/sync PT-BR narration. Muxing a silent
 `anullsrc` track is only a compatibility step, not an audio fix.
 
+## Mining many recordings for testimonial excerpts (text approval before render)
+
+When Carlos drops a folder of meeting recordings and asks for the important excerpts of people talking about the
+agent/product — or him talking about it — the deliverable of the first round is **text, not video**: one
+self-contained excerpt per recording, transcribed accurately, quoted, and sent for approval. Nothing is rendered
+before he picks the numbers. Each excerpt runs **1:00–1:30**, holds a complete thought (never ends mid-sentence),
+and is chosen for what creates curiosity plus something another person could also have (what the agent does alone,
+concrete results, numbers, objections broken). Fat memory discipline: download → extract the 16 kHz mono WAV →
+delete the MP4 at once (a batch like this runs ~5 GB on a nearly full disk) and re-download only the approved
+clips at render time; triage every file with `small`, re-transcribe the chosen windows with `medium` before
+quoting, because `small` mangles the product name. Label every excerpt with who is speaking and whether the image
+is a selfie talking head or a recording of a meeting screen, and warn when two excerpts are the same speaker — he
+asks for variety. Full recipe, including reading the meeting name tags with vision and the transcript↔file
+cross-check: `references/testimonial-excerpt-mining.md`.
+
 ## Procedure
 
 1. **Ingest and read the material before cutting.** `ffprobe` for duration/resolution **and for an audio stream**
@@ -148,6 +166,8 @@ licensed bed (`references/silent-video-music-bed.md`), or create/sync PT-BR narr
 
 ## Pitfalls
 
+- For a single-speaker highlight edit with tight word boundaries, use a brief dip-to-light transition (last 0.10s of the outgoing picture, first 0.10s of the incoming picture) on a few chapter changes and concatenate original speech without overlap. A locally generated, low-level nonverbal whoosh can mark those transitions without crossfading two spoken sentences. Save source-to-final timing and re-transcribe the finished mix to catch missing sentence endings.
+- Check the final pixel format and range, not just the requested encoder flag: phone HEVC metadata can propagate full-range `yuvj420p` through an otherwise `-pix_fmt yuv420p` pipeline. When that happens, explicitly convert `scale=in_range=pc:out_range=tv,format=yuv420p` in the final pass and verify `ffprobe` reports `yuv420p`; reset timestamps and normalize fps in that same final pass when concat introduced irregular frame cadence.
 - **Never feed N clips into one `xfade` filter_complex.** Each buffered 1080x1920 stream costs hundreds of MB; on a
   box with ~1.5 GB free the encode is OOM-killed mid-write and leaves an MP4 with no usable duration. Chain
   **two inputs per ffmpeg run** (`cur` + next segment → intermediate) and repeat; memory stays flat.
@@ -166,7 +186,11 @@ licensed bed (`references/silent-video-music-bed.md`), or create/sync PT-BR narr
   height); check full-size first/middle/end frames before telling Carlos the clips are ready to post.
 - **Do not invent anything on screen:** no testimonials, names, promises, or figures that are not in the footage.
   Legenda text comes from the transcript; brand/CTA lines come from what someone actually says in the video.
-- Long renders go to `background=true` with `notify=true`; do not block a foreground call for minutes on a 2-CPU box.
+- **Never quote from a transcript you did not print with its own file name.** `cat`ing several transcript TXTs
+  into one stream makes the blocks read as if they all belonged to the first file, which puts the right words
+  under the wrong source and the wrong speaker in front of the user. Print one file per header and cross-check the
+  last segment timestamp against that file's `ffprobe` duration before calling anything a quote.
+- Long renders go to `background=true` with `notify=true`; do not block a foreground call for minutes on a 2-CPU box. For delegated production, report a verified milestone or blocker during long work rather than leaving Carlos with only “produção iniciada.” Distinguish rendering, rendered-but-under-review, and delivered; offer an actual playable preview when available, not a completion promise. If a result was already verified and delivered while a child was finishing, consume its later completion silently unless it changes the artifact or reveals a new problem—otherwise the same delivery is sent twice.
 - **Never name a scratch script after a stdlib module.** A helper written as `inspect.py` (also `types.py`,
   `copy.py`, `json.py`) inside the working directory shadows the stdlib for every import in that CWD, so a
   third-party package fails on its own import with a message that blames the library, not your file:
@@ -198,6 +222,15 @@ limit), then the edit plan restated in bullets with the one open creative decisi
 - Say what you will cut and keep in the client's own terms ("sua voz correndo do início ao fim", "corto o final,
 a parte do telefone") and let the editor decide screen-time balance instead of asking the sender for a percentage;
 only the genuinely creative choice (AI scenes vs illustrated scenes) is worth a question.
+
+## Evergreen documentary/VSL loops from existing factory edits
+
+- For an authorized new montage, work in a separate project directory; do not enqueue the assembly as a Reel or change the factory's banco/crons. Reuse real rendered sources when burned captions/brand are already correct; never burn them twice.
+- Build an incremental JSON manifest with source in/out, quantized 30fps duration, narrative function, final timeline and completed segments. Put proof before explanation, then alternate commercial use, implementation method and complementary testimony; finish with an evergreen CTA that naturally returns to the opening proof.
+- Read the exact source ASS events before locking cuts: a broad transcript can differ by a second from the rendered edit, and the next sentence's burned caption can appear before that sentence is spoken. Review a frame just before each out-point and trim before the next ASS event when appropriate.
+- Normalize each selected window with measured two-pass loudnorm, encode all chapters to matching video/audio parameters, and stream-copy concatenated video while re-encoding audio once. Assert final duration against the manifest, decode the complete master and compact copy, check black gaps, and inspect junction/first/last contact sheets.
+- For a ~6-minute Telegram preview, 540x960 two-pass H.264 around 330k plus mono AAC 48k can fit under 20 MB; verify actual bytes and readability rather than promising quality from bitrate. Keep a validated full-quality master link as the preferred source for playback.
+- If editorial QA changes a file after a preview has gone out, explicitly identify the preview as superseded, retain its delivery record separately, and upload/validate a new final link; never silently present the old URL as the revised artifact.
 
 ## Topic factory vs. real footage
 

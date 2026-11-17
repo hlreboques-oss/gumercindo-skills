@@ -12,7 +12,7 @@ desktop:
 network:
   protocol: http
   # Só o IP do Tailscale: NAO fica acessivel pela internet publica.
-  interface: 100.105.134.116   # <-- troque pelo `tailscale ip -4` da maquina
+  interface: <tailscale-ip>   # <-- substitua pela saída de `tailscale ip -4`
   websocket_port: 6901
   use_ipv4: true
   use_ipv6: false

@@ -9,7 +9,8 @@ Carlos sends raw footage (usually a phone video from Google Drive) and asks for 
 título, legenda and transitions between the people on screen. The deliverable is a rendered file he
 can post, not a plan. Concrete commands: `references/ffmpeg-edit-recipes.md`; getting the raw file and
 proving it is the client's: `references/media-intake-and-retrieval.md`; transcription:
-`scripts/transcribe_ptbr.py`.
+`scripts/transcribe_ptbr.py`; long recordings cut into several short captioned clips:
+`references/talk-to-short-cuts.md` + `scripts/build_ass_captions.py`.
 
 ## Intake
 
@@ -20,6 +21,12 @@ proving it is the client's: `references/media-intake-and-retrieval.md`; transcri
   connection (alias `carlos-google-drive`) instead of starting a consent flow the sender cannot complete —
   share as `anyone`/`writer`, read the permissions back, and hand over the `/folders/<id>` URL. Recipe:
   `external-app-oauth-connection-operations`.
+- **Say which account owns the folder, and give a fallback route.** Uploading through a shared link needs
+  the sender signed into *some* Google account, and opening the link inside Telegram/WhatsApp opens a
+  login wall; when the sender answers "não consigo acessar, em qual e-mail você criou?", name the owning
+  account (e.g. `editor@example.com`), ask them to open the link in a real browser, and offer the route
+  that needs no permission at all: they upload from their own Drive and send the file link, which
+  downloads with the `drive.usercontent` curl above.
 - **"I recorded this video" is not evidence it arrived.** Before promising a cut, prove the file is on
   disk: list `~/.hermes/cache/{videos,images,audio,documents}` by mtime, grep the gateway log for a
   cache line belonging to *that* chat, then `ffprobe` the candidate — the cache also holds other chats'
@@ -74,6 +81,29 @@ When Carlos sends a YouTube URL plus a company logo image and asks for a single 
 
 For the final edit, use the supplied logo as the watermark asset: remove dark background/convert to transparent if needed, scale it modestly, place it top-right, and keep it visible without covering faces. Use Whisper on the actual cut when subtitles are absent or bad, manually correct obvious short ASR errors, burn ASS captions in a lower safe band, and build a blurred 9:16 background with the original horizontal video centered. Verify with `ffprobe` and a contact sheet; check logo visibility, subtitle readability, and face coverage before delivery.
 
+## Long talk → several short vertical clips
+
+When the client sends one long recording (palestra, aula, live — often 10–30 min of 4K phone footage)
+and asks for "cortes" of 30s to ~1 min, varied, "que façam sentido", with captions:
+
+1. **Probe including rotation** — `ffprobe -v error -select_streams v:0 -show_entries
+   stream=width,height:stream_side_data=rotation -of json in.mp4`. A phone file can be stored
+   `3840x2160` with `rotation: -90`, i.e. already vertical; pick the framing and the caption band from
+   the rotated dimensions.
+2. **Plan from a full-file transcript, caption from a window transcript.** The full pass tells you which
+   stretches are self-contained; before burning captions, re-extract that exact window's audio and
+   re-transcribe it with `word_timestamps=True` (full-file segment times are coarse and drift).
+3. **Pick a window that opens on a hook and closes on a complete, quotable line.** Drop the greeting
+   ("boa noite, é uma honra") and the closing housekeeping. Check the cut point with
+   `ffmpeg -ss <t> -t 3 -i in.mp4 -vn -af volumedetect -f null -`: room tone ≈ -26 dB mean, speech ≈
+   -12 dB; a cut opening on room tone reads as a dead start.
+4. **Deliver one sample cut and stop.** The client asked to approve format and caption style before the
+   batch — send that one file, name the format in one line, wait for the go-ahead, then reuse the same
+   ASS style and render command for the rest.
+
+Recipe, caption rules, ASS style, render and QA commands: `references/talk-to-short-cuts.md`;
+caption timing builder: `scripts/build_ass_captions.py`.
+
 ## Always
 
 - The render is not done until the output duration equals the expected duration
@@ -96,6 +126,18 @@ For the final edit, use the supplied logo as the watermark asset: remove dark ba
 - A killed encode is silent: always `ffprobe` the finished file, never infer success from the exit code.
 - Inspect frames, not a poster: only a still shows text sitting on someone's face, which no duration
   check catches.
+- **Read `stream_side_data.rotation` before designing a layout.** A 4K phone file often stores
+  3840x2160 with `rotation: -90`, so it is already vertical; a blurred-16:9-to-vertical frame built for
+  it is wasted work and looks wrong. `ffmpeg` autorotates on decode, so the filter chain sees the
+  rotated size — the error happens in the planning, not in the encode.
+- **Caption blocks built from a full-file transcript drift.** Long-recording segment times come from a
+  coarse VAD pass and stretch the speech, so the burned captions sit early/late and the clip opens on
+  silence. Re-extract the exact window (`-ss/-t` to 16k mono wav) and re-transcribe it with
+  `word_timestamps=True`; build blocks from word times.
+- **Large Drive originals need a disk and retrieval strategy.** When the original exceeds free disk, extract bounded windows through an HTTP-range-capable URL into small local proxies; validate every proxy with ffprobe before transcribing. Repeated remote seeks may exhaust Drive's download quota and return an HTML quota page with HTTP 200, so never treat a zero-exit encode or HTTP 200 as proof of valid video. Preserve finished proxies and use only genuinely downloaded footage if retrieval becomes blocked; do not invent replacement scenes. MP4 sparse-range recovery is possible from moov sample tables, but mark sparse files as incomplete and never mistake them for a verified original.
+- **Correct ASR tokens before caption grouping.** Corrections spanning several words can straddle caption blocks; fix the word sequence first, retain its original time span, then group. Merge tiny trailing caption fragments when they would flash for a fraction of a second. Check title frames for newline/tofu glyphs and shorten the title instead of leaving a broken character.
+- **The last caption must be a finished sentence.** Step the tail of the render before delivering: a
+  cut whose last line stops mid-phrase reads as a broken export even when duration and loudness pass.
 - Do not keep the model's raw spelling of the brand, and do not invent quotes the person did not say
   in the footage.
 - Do not publish or send the video to third parties; the deliverable goes to Carlos unless he says

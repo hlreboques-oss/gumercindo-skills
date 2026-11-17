@@ -55,6 +55,19 @@ When it is missing, ask for the file in the same reply as the plan — never ope
 Do not offer a download route you cannot actually run: without a logged-in user session on the box there is no
 way to pull a group attachment that the bot never received, so the sender re-sending is the real route.
 
+## Google Drive — direct file link before folder troubleshooting
+
+1. Resolve the exact supplied filename or `/file/d/<FILE_ID>/view` link; a folder's public HTML listing may be incomplete, so absence from that listing is not proof that the upload is missing. If discovery cannot identify the requested file, ask for **the file's own Share → Copy link**, not another upload or the folder link again.
+2. For an already shared, downloadable native video, use the file ID directly without requiring OAuth or a browser login:
+   ```bash
+   curl -L --fail --max-time 180 -o source.mp4 \
+     'https://drive.usercontent.google.com/download?id=<FILE_ID>&export=download&confirm=t'
+   ffprobe -v error -show_entries format=duration,size:stream=codec_type,width,height -of json source.mp4
+   ```
+   Create a project-specific directory first and retain the source filename and Drive ID in its manifest. This route was exercised on a large phone MP4; still validate every result because a permission or virus-scan page can return HTML instead of media. If the file is not shared for download, use an authorized connection or request access; do not bypass permissions.
+3. Answer a duration-confirmation question from the probe, with minutes and seconds computed by a tool; do not infer duration from the filename, upload size, or the user's estimate. Also verify the original audio stream before starting the edit.
+4. Keep ingestion separate from publishing: obtaining a video and permission to edit it does not authorize posting or resuming paused social automations.
+
 ## YouTube / generic URLs — extractor ladder
 
 1. `yt-dlp -x`/`-f bestvideo+bestaudio` as usual.
@@ -68,6 +81,14 @@ way to pull a group attachment that the bot never received, so the sender re-sen
    name; it is a different domain from the submit endpoint), take the final download URL, then verify locally.
 5. A front-end/mirror is only usable if the bytes are media: HTTP 200 with `text/html` or a ~20-byte body is the
    classic fake success.
+
+### Proven converter and transcript recipe
+
+- Before inventing converter endpoints, look for an existing local acquisition script. The proven Loader route is `GET https://loader.to/ajax/download.php` with query `format=480` and `url=<YouTube URL>` (browser User-Agent and Loader Referer). Read its returned `progress_url`, poll that exact URL, then stream the final `download_url` to disk. The media endpoint may omit Content-Length: `ffprobe` the completed download and require real video plus original audio. Use 480p/720p on a nearly full disk rather than downloading an unnecessary high-resolution master.
+- Probe and decode the converter output before trusting its requested quality or soundtrack. A `format=480` request can return an actual 240x426 file, and an apparently valid AAC stream can fail with scalefactor-band decode errors. Preserve that source for visual reference, acquire `format=mp3` separately through the same progress-URL flow, and transcribe the verified MP3 instead of calling an empty ASR result a silent reference. Never present the low-resolution reference as a production master.
+- The existing `/root/process_youtube_xx3s.py` contains the working encrypted DownSub request and subtitle fetch recipe. Select `language == 'pt'` explicitly: the first subtitle track can be English, even for Portuguese speech. If `Crypto` is unavailable but `cryptography` is installed, use its AES-CBC encryptor and PKCS#7 padding instead of changing environments or installing another package blindly.
+- Make render scripts rerunnable: preserve the original ASR window start separately from the final editorial start. Shift caption word times from the immutable ASR origin on every run; using a start field already rewritten by a previous render silently misaligns the second render.
+- Preserve the complete source picture over a darkened blurred vertical background when the edit alternates wide two-person shots and single-camera shots; inspect opening/middle/end frames and keep captions outside the picture, not over a face.
 
 ## Always probe before cutting
 

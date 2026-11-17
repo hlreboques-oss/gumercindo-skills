@@ -16,6 +16,7 @@ user wants a brand character/logo inside the frame.
   (e.g. `CARLOS JÚNIOR  •  IA E GUMERCINDO` vs `CARLOS JÚNIOR  •  COM VICTOR HUGO`).
 - `quote` = literal transcript line that justifies the cut. Review the manifest before rendering; a clip
   whose quote does not carry the theme is dropped, not padded.
+- Treat the source's coherent, non-overlapping material as the batch-size limit, not the example counts above. If no count was requested, do not stop at one from a long source and do not pad a short source to reach a preset count. Preserve explicitly requested wording and persistence for the top title; a requested permanent event header overrides the usual opening-only hook.
 - One self-contained render script reads the manifest and processes one clip per invocation
   (`python render.py clips.json 03,07`), so parallel workers can own ID slices and a timeout never loses
   the whole batch. Append each finished clip to `summary.json` (path, duration, size, md5) as it completes.
@@ -31,7 +32,7 @@ user wants a brand character/logo inside the frame.
 - Repair ASR tokens before writing captions: merge proper nouns the model splits across two words, collapse the
   duplicate the merge leaves behind (`Gumercindo Gumercindo`), and rejoin hyphenated compounds (`e -mail` →
   `e-mail`). Fix names, brands and formatting only — never rewrite arbitrary misheard words.
-- Group words until ~41 characters or ~3.4 s, break at sentence end, wrap at 25 characters per line.
+- Group words until ~41 characters or ~3.4 s, break at sentence end, wrap at 25 characters per line. Test the wrapped candidate before appending each word: a raw character cap does not guarantee two lines because word boundaries leave unused space. Start the next caption group when adding a word would produce a third line; never silently truncate it.
 - Cap every group's end at the **next** group's start; otherwise the last caption of a sentence overlaps the next.
 - Write both ASS (burned) and SRT (`HH:MM:SS,mmm`, correct zero padding) — the SRT is the hand-off artifact.
 

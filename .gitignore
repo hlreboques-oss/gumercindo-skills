@@ -1,0 +1,22 @@
+# Dependências e artefatos locais
+node_modules/
+__pycache__/
+*.py[cod]
+.venv/
+.env
+*.env
+
+# Credenciais e chaves
+*.pem
+*.key
+*.p12
+*.pfx
+.secrets/
+
+# Saídas de mídia e temporários
+*.mp4
+*.mov
+*.mkv
+*.wav
+*.mp3
+.DS_Store

@@ -1,7 +1,8 @@
-# Gumercindo Skills — pacote de habilidades
+# Gumercindo Skills — habilidades compartilháveis para agentes
 
-Pacote de skills (habilidades) do agente **Gumercindo** para instalar em qualquer
-Hermes novo em 1 minuto. Feito para a implementação do agente do cliente.
+Pacote público de skills (habilidades) do agente **Gumercindo** para instalar ou
+atualizar outros agentes Hermes. O repositório reúne procedimentos reutilizáveis,
+scripts auxiliares e referências operacionais sem incluir senhas, tokens ou chaves.
 
 ## O que tem aqui
 
@@ -40,13 +41,26 @@ mindset/
 cd /tmp
 git clone https://github.com/hlreboques-oss/gumercindo-skills.git
 
-# 2. instalar as skills no Hermes
-mkdir -p ~/.hermes/skills
-cp -r /tmp/gumercindo-skills/skills/* ~/.hermes/skills/
+# 2. conferir o que será instalado
+cd /tmp/gumercindo-skills
+./install.sh --dry-run
 
-# 3. conferir
+# 3. instalar ou atualizar as skills no Hermes
+./install.sh
+
+# 4. conferir
 hermes skills list 2>/dev/null || ls ~/.hermes/skills
 ```
+
+Destino personalizado:
+
+```bash
+./install.sh --dest /caminho/do/agente/skills
+```
+
+O instalador preserva skills que já existem no destino e atualiza somente os
+arquivos presentes neste pacote. Dependências locais como `node_modules`, caches
+Python e arquivos de credencial são ignorados.
 
 Depois, no chat com o agente:
 

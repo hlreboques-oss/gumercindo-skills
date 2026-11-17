@@ -50,9 +50,9 @@ Carlos repeatedly hits two blockers:
      server {
        listen 127.0.0.1:18011;
        location / {
-         proxy_pass http://100.105.134.116:3010;
+         proxy_pass http://<tailscale-ip>:3010;
          proxy_http_version 1.1;
-         proxy_set_header Host 100.105.134.116:3010;
+         proxy_set_header Host <tailscale-ip>:3010;
          proxy_set_header Authorization "Basic <base64-user-pass>";
          proxy_set_header X-Forwarded-Proto https;
          proxy_set_header Upgrade $http_upgrade;

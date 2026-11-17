@@ -9,7 +9,7 @@ version: 1.0.0
 Classe de trabalho: Carlos manda um vídeo bruto de celular (evento, depoimento, roda de conversa) e pede “pôr título, legenda e transições”. Entregar MP4 real, verificado, não um plano.
 
 ## Entrada e upload
-- Criar pasta no Drive dele (`hlreboques@gmail.com`) e dar permissão de link como `writer`, para ele subir de qualquer conta; o arquivo conta na cota de **quem envia**, não do dono da pasta. Avisar quando o Drive dele estiver quase cheio.
+- Criar pasta no Drive dele (`editor@example.com`) e dar permissão de link como `writer`, para ele subir de qualquer conta; o arquivo conta na cota de **quem envia**, não do dono da pasta. Avisar quando o Drive dele estiver quase cheio.
 - Confirmar a chegada listando os vídeos da pasta por script antes de dizer que não chegou. Painéis de terceiros (ArpChat, WhatsApp Web) no navegador visível expiram e voltam para login — checar a aba antes de prometer envio por interface.
 - Baixar o arquivo e conferir tamanho antes de editar.
 

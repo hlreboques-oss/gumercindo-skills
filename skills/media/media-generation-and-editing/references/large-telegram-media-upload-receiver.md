@@ -9,10 +9,10 @@ Use this when Carlos needs Gumercindo to transcribe or process a phone video/aud
    - a minimal Python `http.server` with an HTML multipart form is enough;
    - save uploads under a clear directory such as `/root/uploads/carlos-transcricao/`;
    - print a receipt line such as `UPLOAD_RECEIVED /path/file size` so the background process can notify.
-3. **Bind privately first** to the Tailscale IP if Carlos is on the tailnet, e.g. `100.105.134.116:8765`.
+3. **Bind privately first** to the Tailscale IP if the user is on the tailnet, e.g. `<tailscale-ip>:8765`.
 4. **Verify the page loads** with a real HTTP GET before sending the link.
 5. If Carlos cannot access the Tailscale link, start a **temporary Cloudflare quick tunnel** to the same local endpoint and validate the public URL loads:
-   - `cloudflared tunnel --url http://100.105.134.116:8765`
+   - `cloudflared tunnel --url http://<tailscale-ip>:8765`
    - read logs for the `https://...trycloudflare.com` URL;
    - verify the form text returns over HTTPS;
    - remind Carlos the link is temporary.

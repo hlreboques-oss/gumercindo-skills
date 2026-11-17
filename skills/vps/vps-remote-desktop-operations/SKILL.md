@@ -115,6 +115,10 @@ Then look at the PNG with vision and send it. 401-without / 200-with is the auth
 
 ## Pitfalls
 
+- On a newly installed KasmVNC, do not probe the wrapper with `vncserver -version`: it can enter interactive desktop selection instead of reporting a version. Read package metadata with `dpkg-query`, inspect the installed YAML schema and configure `xstartup` plus `-select-de manual` before starting the target user's service.
+- Prefer a dedicated non-root desktop user with a locked OS password, its own fresh Chrome profile, per-user Kasm configuration and a random VNC credential stored mode0600. Do not copy login profiles or cookies. Match `PIDFile` to the actual user's `.vnc/<hostname>:<display>.pid`; validate X clients and a real screenshot in that user's display, not merely the HTTP port.
+- If the target has no Tailscale membership, keep Kasm on target loopback and use an authorized persistent SSH forward through the operator, with a separate private Tailscale Serve HTTPS port. This creates operator access only: do not claim the client's own device can reach it before tailnet access is authorized. Snapshot and compare all pre-existing Serve/Funnel configuration, verify unauthenticated401/authenticated200 and TLS, and distinguish browser installation from a completed login or agent integration.
+
 - **Bare `vncserver :1` stops on an interactive desktop-environment prompt** and dies with `Failed to execute /usr/lib/kasmvncserver/select-de.sh`. Always pass `-select-de manual` so `~/.vnc/xstartup` (and therefore XFCE) is used non-interactively.
 - **A system-level `systemctl list-units | grep kasm` shows nothing before the unit exists** under `/etc/systemd/system/`; do not conclude the install failed.
 - **Clicking a dialog by coordinates on an unfocused window does not work.** Activate the window first (`xdotool windowactivate --sync <id>`), and prefer Return on the default button; verify the dialog closed by re-enumerating windows rather than trusting the click.
